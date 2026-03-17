@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Suivi">
+<meta name="theme-color" content="#0f0e0c">
+<title>Mon Suivi — Perte de Poids</title>
+<style>
+  /* iOS safe areas */
+  body { padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: max(60px, calc(env(safe-area-inset-bottom) + 60px)); padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1916;
+    --surface2: #232220;
+    --border: #2e2c29;
+    --accent: #c9a96e;
+    --accent2: #7eb8a4;
+    --accent3: #d4776a;
+    --text: #e8e4dc;
+    --text-muted: #8a8680;
+    --text-soft: #c4bfb6;
+    --green: #7eb8a4;
+    --red: #d4776a;
+    --gold: #c9a96e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-top: 20px;
+    position: relative;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--accent));
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    color: var(--text);
+    margin-top: 48px;
+    letter-spacing: -0.5px;
+  }
+  .header h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .header p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* DATE */
+  .date-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+  }
+  .date-bar label { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
+  .date-bar input[type="date"] {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+  }
+  .date-bar input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+
+  /* SECTION HEADERS */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CARDS GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .grid-1 { margin-bottom: 12px; }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:focus-within { border-color: var(--accent); }
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .card-icon {
+    position: absolute;
+    top: 14px; right: 16px;
+    font-size: 18px;
+    opacity: 0.5;
+  }
+
+  /* INPUTS */
+  input[type="number"], input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input[type="number"]:focus, input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+  }
+  textarea { resize: none; line-height: 1.5; }
+  select option { background: var(--surface2); }
+
+  .big-number input[type="number"] {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    padding: 12px;
+    font-family: 'DM Serif Display', serif;
+    color: var(--accent);
+    border-color: transparent;
+    background: transparent;
+  }
+  .big-number input[type="number"]:focus { border-color: var(--accent); background: var(--surface2); }
+  .big-number .unit {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* STARS / RATING */
+  .rating-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .rating-row label {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 100%;
+    margin-bottom: 6px;
+  }
+  .star-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .star-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .star-btn.active-energy { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+  .star-btn.active-humeur { background: var(--green); border-color: var(--green); color: var(--bg); }
+  .star-btn.active-stress { background: var(--red); border-color: var(--red); color: var(--bg); }
+  .star-btn.active-faim { background: var(--accent2); border-color: var(--accent2); color: var(--bg); }
+
+
+  /* RATING LEGEND */
+  .rating-legend {
+    width: 100%;
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .legend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .legend-item {
+    flex: 1;
+    text-align: center;
+    font-size: 9px;
+    color: var(--text-muted);
+    line-height: 1.3;
+    padding: 2px;
+  }
+  .legend-item strong {
+    display: block;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+  .legend-item.bad strong { color: var(--red); }
+  .legend-item.good strong { color: var(--green); }
+  .legend-item.mid strong { color: var(--text-soft); }
+  /* TOGGLE CHIPS */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--text-muted); color: var(--text); }
+  .chip.active { border-color: var(--accent); background: rgba(201,169,110,0.12); color: var(--accent); }
+  .chip.active-green { border-color: var(--green); background: rgba(126,184,164,0.12); color: var(--green); }
+  .chip.active-red { border-color: var(--red); background: rgba(212,119,106,0.12); color: var(--red); }
+
+  /* SECTION SPACING */
+  .section { margin-bottom: 32px; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* SCORE BAR */
+  .score-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .score-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--accent);
+  }
+  .score-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* BUTTONS */
+  .btn-row { display: flex; gap: 10px; margin-top: 32px; flex-wrap: wrap; }
+  .btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .btn-primary:hover { background: #dbb97e; transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid rgba(212,119,106,0.3);
+  }
+  .btn-danger:hover { background: rgba(212,119,106,0.1); }
+
+  /* HISTORY */
+  .history-list { display: flex; flex-direction: column; gap: 10px; }
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .history-item:hover { border-color: var(--accent); }
+  .history-date { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .history-metrics { display: flex; gap: 16px; flex-wrap: wrap; }
+  .history-metric { font-size: 13px; }
+  .history-metric span { color: var(--text-muted); font-size: 11px; }
+  .history-delete {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+    flex-shrink: 0;
+  }
+  .history-delete:hover { color: var(--red); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent);
+    color: var(--bg);
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin-top: 8px; }
+  .progress-track { background: var(--surface2); border-radius: 100px; height: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 100px; transition: width 0.5s ease; }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+
+  @media (max-width: 400px) {
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- iOS Splash -->
+<div id="splash" style="position:fixed;inset:0;background:#0f0e0c;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s">
+  <div style="font-family:'DM Serif Display',serif;font-size:36px;color:#c9a96e;margin-bottom:8px">Mon <em>Suivi</em></div>
+  <div style="font-size:12px;color:#8a8680;letter-spacing:0.1em;text-transform:uppercase">Chargement...</div>
+</div>
+
+<div class="header">
+  <h1>Mon <em>Suivi</em></h1>
+  <p>Programme accompagnement · Démarré le 17 mars 2026</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('saisie')">📝 Aujourd'hui</button>
+  <button class="tab" onclick="switchTab('historique')">📊 Historique</button>
+  <button class="tab" onclick="switchTab('objectifs')">🎯 Objectifs</button>
+</div>
+
+<!-- ===================== PANEL SAISIE ===================== -->
+<div id="panel-saisie" class="panel active">
+
+  <!-- Date -->
+  <div class="date-bar">
+    <div>
+      <label>Date de saisie</label>
+      <input type="date" id="date" />
+    </div>
+    <div style="text-align:right">
+      <label>Semaine</label>
+      <div id="week-num" style="font-size:15px;font-weight:500;color:var(--accent)">—</div>
+    </div>
+  </div>
+
+  <!-- MESURES -->
+  <div class="section">
+    <div class="section-title">Mesures</div>
+    <div class="grid-3">
+      <div class="card big-number">
+        <div class="card-label">Poids</div>
+        <div class="card-icon">⚖️</div>
+        <input type="number" id="poids" step="0.1" min="40" max="150" placeholder="62.0">
+        <div class="unit">kg</div>
+      </div>
+      <div class="card big-number">
+        <div class="card-label">Sommeil</div>
+        <div class="card-icon">🌙</div>
+        <input type="number" id="sommeil" step="0.25" min="0" max="12" placeholder="6.5">
+        <div class="unit">heures</div>
+      </div>
+      <div class="card big-number">
+        <div class="card-label">Eau</div>
+        <div class="card-icon">💧</div>
+        <input type="number" id="eau" step="0.5" min="0" max="5" placeholder="1.5">
+        <div class="unit">litres</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESSENTIS -->
+  <div class="section">
+    <div class="section-title">Ressentis du jour</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div class="rating-row">
+          <label>Énergie physique</label>
+          <button class="star-btn" onclick="setRating('energie',1)" id="energie-1">1</button>
+          <button class="star-btn" onclick="setRating('energie',2)" id="energie-2">2</button>
+          <button class="star-btn" onclick="setRating('energie',3)" id="energie-3">3</button>
+          <button class="star-btn" onclick="setRating('energie',4)" id="energie-4">4</button>
+          <button class="star-btn" onclick="setRating('energie',5)" id="energie-5">5</button>
+        </div>
+        <div class="rating-legend">
+          <div class="legend-row">
+            <div class="legend-item bad"><strong>1</strong>Épuisée, difficile de fonctionner</div>
+            <div class="legend-item mid"><strong>2</strong>Fatiguée</div>
+            <div class="legend-item mid"><strong>3</strong>Correct, je fonctionne</div>
+            <div class="legend-item mid"><strong>4</strong>Bonne énergie</div>
+            <div class="legend-item good"><strong>5</strong>Pleine d'énergie, état optimal</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">😌</div>
+        <div class="rating-row">
+          <label>Humeur émotionnelle</label>
+          <button class="star-btn" onclick="setRating('humeur',1)" id="humeur-1">1</button>
+          <button class="star-btn" onclick="setRating('humeur',2)" id="humeur-2">2</button>
+          <button class="star-btn" onclick="setRating('humeur',3)" id="humeur-3">3</button>
+          <button class="star-btn" onclick="setRating('humeur',4)" id="humeur-4">4</button>
+          <button class="star-btn" onclick="setRating('humeur',5)" id="humeur-5">5</button>
+        </div>
+        <div class="rating-legend">
+          <div class="legend-row">
+            <div class="legend-item bad"><strong>1</strong>Très mal, triste ou irritable</div>
+            <div class="legend-item mid"><strong>2</strong>Morose, pas dans mon assiette</div>
+            <div class="legend-item mid"><strong>3</strong>Neutre, ni bien ni mal</div>
+            <div class="legend-item mid"><strong>4</strong>Bonne humeur, sereine</div>
+            <div class="legend-item good"><strong>5</strong>Légère, très positive</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌊</div>
+        <div class="rating-row">
+          <label>Stress (1=max, 5=calme)</label>
+          <button class="star-btn" onclick="setRating('stress',1)" id="stress-1">1</button>
+          <button class="star-btn" onclick="setRating('stress',2)" id="stress-2">2</button>
+          <button class="star-btn" onclick="setRating('stress',3)" id="stress-3">3</button>
+          <button class="star-btn" onclick="setRating('stress',4)" id="stress-4">4</button>
+          <button class="star-btn" onclick="setRating('stress',5)" id="stress-5">5</button>
+        </div>
+        <div class="rating-legend">
+          <div class="legend-row">
+            <div class="legend-item bad"><strong>1</strong>Submergée, très stressée</div>
+            <div class="legend-item mid"><strong>2</strong>Stressée, tendue</div>
+            <div class="legend-item mid"><strong>3</strong>Stress modéré, gérable</div>
+            <div class="legend-item mid"><strong>4</strong>Peu de stress, calme</div>
+            <div class="legend-item good"><strong>5</strong>Très sereine, aucune tension</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🍽️</div>
+        <div class="rating-row">
+          <label>Faim (réelle vs émotionnelle)</label>
+          <button class="star-btn" onclick="setRating('faim',1)" id="faim-1">1</button>
+          <button class="star-btn" onclick="setRating('faim',2)" id="faim-2">2</button>
+          <button class="star-btn" onclick="setRating('faim',3)" id="faim-3">3</button>
+          <button class="star-btn" onclick="setRating('faim',4)" id="faim-4">4</button>
+          <button class="star-btn" onclick="setRating('faim',5)" id="faim-5">5</button>
+        </div>
+        <div class="rating-legend">
+          <div class="legend-row">
+            <div class="legend-item bad"><strong>1</strong>Pas faim, alimentation 100% émotionnelle</div>
+            <div class="legend-item mid"><strong>2</strong>Peu de faim réelle, surtout des envies</div>
+            <div class="legend-item mid"><strong>3</strong>Faim normale, bien régulée</div>
+            <div class="legend-item mid"><strong>4</strong>Faim présente, bien gérée</div>
+            <div class="legend-item good"><strong>5</strong>Faim claire, aucune envie parasite</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALIMENTATION -->
+  <div class="section">
+    <div class="section-title">Alimentation</div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">Repas respectés</div>
+      <div class="chips" id="repas-chips">
+        <div class="chip" onclick="toggleChip(this,'green')">🌅 Petit-déj</div>
+        <div class="chip" onclick="toggleChip(this,'green')">☀️ Déjeuner</div>
+        <div class="chip" onclick="toggleChip(this,'green')">🌙 Dîner</div>
+      </div>
+    </div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">Grignotage hors repas</div>
+      <div class="chips" id="grignotage-chips">
+        <div class="chip" onclick="toggleChip(this,'red')">😰 Stress</div>
+        <div class="chip" onclick="toggleChip(this,'red')">😴 Fatigue</div>
+        <div class="chip" onclick="toggleChip(this,'red')">😶 Ennui</div>
+        <div class="chip" onclick="toggleChip(this,'red')">🤤 Envie sucre</div>
+        <div class="chip" onclick="toggleChip(this,'red')">🧀 Envie gras</div>
+        <div class="chip" onclick="toggleChip(this,'green')">✅ Aucun</div>
+      </div>
+    </div>
+    <div class="card grid-1">
+      <div class="card-label">Règle des 10 minutes utilisée ?</div>
+      <div class="chips">
+        <div class="chip" id="r10-oui" onclick="setR10('oui')">✅ Oui</div>
+        <div class="chip" id="r10-non" onclick="setR10('non')">❌ Non applicable</div>
+        <div class="chip" id="r10-oubli" onclick="setR10('oubli')">😅 Oublié</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPORT -->
+  <div class="section">
+    <div class="section-title">Activité physique</div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">Type d'activité</div>
+      <div class="chips" id="sport-chips">
+        <div class="chip" onclick="toggleChip(this,'green')">🏃 Run</div>
+        <div class="chip" onclick="toggleChip(this,'green')">⛳ Golf</div>
+        <div class="chip" onclick="toggleChip(this,'green')">🧘 Yoga/Pilates</div>
+        <div class="chip" onclick="toggleChip(this,'green')">🥋 Krav Maga</div>
+        <div class="chip" onclick="toggleChip(this,'green')">🚶 Marche soir</div>
+        <div class="chip" onclick="toggleChip(this,'green')">Autre</div>
+        <div class="chip" onclick="toggleChip(this,'red')">Repos</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">Motivation</div>
+        <div class="chips" style="flex-direction:column;gap:6px">
+          <div class="chip" id="mot-plaisir" onclick="setMotivation('plaisir')" style="text-align:center">😊 Plaisir</div>
+          <div class="chip" id="mot-peur" onclick="setMotivation('peur')" style="text-align:center">😨 Peur de prendre</div>
+          <div class="chip" id="mot-habitude" onclick="setMotivation('habitude')" style="text-align:center">🔄 Habitude</div>
+        </div>
+      </div>
+      <div class="card big-number">
+        <div class="card-label">Durée</div>
+        <div class="card-icon">⏱️</div>
+        <input type="number" id="sport-duree" step="5" min="0" max="300" placeholder="45">
+        <div class="unit">minutes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALIMENTATION DÉTAILLÉE -->
+  <div class="section">
+    <div class="section-title">Ce que j'ai mangé</div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">🌅 Petit-déjeuner</div>
+      <textarea id="repas-matin" rows="2" placeholder="Ex: œufs brouillés, tartine complète, café..."></textarea>
+    </div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">☀️ Déjeuner</div>
+      <textarea id="repas-midi" rows="2" placeholder="Ex: poulet grillé, haricots verts, quinoa, huile d'olive..."></textarea>
+    </div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">🌆 Collation (si applicable)</div>
+      <textarea id="repas-collation" rows="2" placeholder="Ex: fruit + amandes, yaourt nature..."></textarea>
+    </div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">🌙 Dîner</div>
+      <textarea id="repas-soir" rows="2" placeholder="Ex: soupe de légumes, œufs cocotte, tartine..."></textarea>
+    </div>
+    <div class="card grid-1">
+      <div class="card-label">🍫 Grignotage / extras (si applicable)</div>
+      <textarea id="repas-extras" rows="2" placeholder="Ex: 2 carrés chocolat noir, chips au bureau..."></textarea>
+    </div>
+  </div>
+
+  <!-- BONNE ACTION DU JOUR -->
+  <div class="section">
+    <div class="section-title">Bilan du jour</div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">✨ Une chose bien faite aujourd'hui (au travail ou ailleurs)</div>
+      <textarea id="bonne-action" rows="2" placeholder="Même petite, notez-la..."></textarea>
+    </div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label">🧠 Principal déclencheur d'envie identifié</div>
+      <input type="text" id="declencheur" placeholder="Ex: réunion stressante vers 15h...">
+    </div>
+    <div class="card grid-1">
+      <div class="card-label">📝 Note libre (optionnel)</div>
+      <textarea id="notes" rows="3" placeholder="Ressentis, observations, questions..."></textarea>
+    </div>
+  </div>
+
+  <!-- BOUTONS -->
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="saveEntry()">💾 Enregistrer le jour</button>
+    <button class="btn btn-secondary" onclick="resetForm()">🔄 Réinitialiser</button>
+  </div>
+
+</div>
+
+<!-- ===================== PANEL HISTORIQUE ===================== -->
+<div id="panel-historique" class="panel">
+
+  <div class="section">
+    <div class="section-title">Évolution du poids</div>
+    <div class="card">
+      <div id="poids-chart" style="min-height:80px;display:flex;align-items:flex-end;gap:6px;padding-top:20px;position:relative;">
+        <div class="empty"><div class="empty-icon">📉</div>Enregistrez des données pour voir votre courbe</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Entrées enregistrées</div>
+    <div class="history-list" id="history-list">
+      <div class="empty"><div class="empty-icon">📋</div>Aucune entrée pour le moment</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="exportData()">📤 Exporter JSON</button>
+    <button class="btn btn-secondary" onclick="importData()">📥 Importer JSON</button>
+  </div>
+  <div style="margin-top:10px">
+    <button class="btn btn-danger" onclick="clearAll()" style="width:100%">🗑️ Effacer toutes les données</button>
+  </div>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+
+</div>
+
+<!-- ===================== PANEL OBJECTIFS ===================== -->
+<div id="panel-objectifs" class="panel">
+
+  <div class="section">
+    <div class="section-title">Paramètres personnels</div>
+    <div class="grid-2">
+      <div class="card big-number">
+        <div class="card-label">Poids de départ</div>
+        <input type="number" id="poids-depart" step="0.1" placeholder="62.0" onchange="saveObjectifs()">
+        <div class="unit">kg</div>
+      </div>
+      <div class="card big-number">
+        <div class="card-label">Poids objectif</div>
+        <input type="number" id="poids-objectif" step="0.1" placeholder="52.0" onchange="saveObjectifs()">
+        <div class="unit">kg</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Progression</div>
+    <div class="card">
+      <div class="score-display">
+        <div>
+          <div class="score-label">Perte actuelle</div>
+          <div class="score-val" id="perte-actuelle">— kg</div>
+        </div>
+        <div style="text-align:right">
+          <div class="score-label">Objectif restant</div>
+          <div class="score-val" id="perte-restante" style="color:var(--accent2)">— kg</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-labels">
+          <span id="prog-depart">—</span>
+          <span id="prog-pct">0%</span>
+          <span id="prog-objectif">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Objectifs hebdomadaires</div>
+    <div class="card grid-1" style="margin-bottom:12px">
+      <div class="card-label" style="margin-bottom:14px">✅ Cochez vos objectifs de la semaine</div>
+      <div style="display:flex;flex-direction:column;gap:10px" id="objectifs-checks">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px">
+          <input type="checkbox" class="obj-check" style="accent-color:var(--accent);width:18px;height:18px"> Sommeil fixe ≥ 7h, 5 nuits/7
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px">
+          <input type="checkbox" class="obj-check" style="accent-color:var(--accent);width:18px;height:18px"> Journal rempli chaque jour
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px">
+          <input type="checkbox" class="obj-check" style="accent-color:var(--accent);width:18px;height:18px"> Règle des 10 min utilisée ≥ 1x
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px">
+          <input type="checkbox" class="obj-check" style="accent-color:var(--accent);width:18px;height:18px"> Une activité sport par plaisir
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px">
+          <input type="checkbox" class="obj-check" style="accent-color:var(--accent);width:18px;height:18px"> Marche soir ≥ 4 fois
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px">
+          <input type="checkbox" class="obj-check" style="accent-color:var(--accent);width:18px;height:18px"> Une bonne action notée par jour
+        </label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Score de la semaine</div>
+      <div class="score-display">
+        <div class="score-val" id="obj-score">0/6</div>
+        <div style="text-align:right;font-size:13px;color:var(--text-muted)" id="obj-msg">Commencez votre semaine ✨</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="saveObjectifs()">💾 Sauvegarder</button>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Enregistré !</div>
+
+<script>
+// ===== STATE =====
+let ratings = { energie: 0, humeur: 0, stress: 0, faim: 0 };
+let r10 = '';
+let motivation = '';
+
+// ===== INIT =====
+window.onload = () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date').value = today;
+  updateWeek();
+  document.getElementById('date').addEventListener('change', updateWeek);
+  loadObjectifs();
+  renderHistory();
+  updateProgress();
+  document.querySelectorAll('.obj-check').forEach(cb => cb.addEventListener('change', updateObjScore));
+  updateObjScore();
+};
+
+function updateWeek() {
+  const d = new Date(document.getElementById('date').value);
+  const start = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
+  document.getElementById('week-num').textContent = `S${week}`;
+}
+
+// ===== TABS =====
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'historique') { renderHistory(); updateProgress(); }
+  if (tab === 'objectifs') { loadObjectifs(); updateProgress(); }
+}
+
+// ===== RATINGS =====
+function setRating(type, val) {
+  ratings[type] = val;
+  const colorMap = { energie: 'energy', humeur: 'humeur', stress: 'stress', faim: 'faim' };
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById(`${type}-${i}`);
+    btn.classList.remove('active-energy','active-humeur','active-stress','active-faim');
+    if (i <= val) btn.classList.add(`active-${colorMap[type]}`);
+  }
+}
+
+// ===== CHIPS =====
+function toggleChip(el, color) {
+  el.classList.toggle('active');
+  if (el.classList.contains('active')) {
+    el.classList.add(color === 'green' ? 'active-green' : 'active-red');
+  } else {
+    el.classList.remove('active-green','active-red');
+  }
+}
+
+function setR10(val) {
+  r10 = val;
+  ['oui','non','oubli'].forEach(v => {
+    const el = document.getElementById(`r10-${v}`);
+    el.classList.remove('active','active-green','active-red');
+  });
+  const el = document.getElementById(`r10-${val}`);
+  el.classList.add('active', val === 'oui' ? 'active-green' : 'active-red');
+}
+
+function setMotivation(val) {
+  motivation = val;
+  ['plaisir','peur','habitude'].forEach(v => {
+    const el = document.getElementById(`mot-${v}`);
+    el.classList.remove('active','active-green','active-red');
+  });
+  const el = document.getElementById(`mot-${val}`);
+  el.classList.add('active', val === 'plaisir' ? 'active-green' : val === 'peur' ? 'active-red' : 'active');
+}
+
+// ===== GET ACTIVE CHIPS =====
+function getActiveChips(containerId) {
+  return Array.from(document.querySelectorAll(`#${containerId} .chip.active`)).map(c => c.textContent.trim());
+}
+
+// ===== SAVE =====
+function saveEntry() {
+  const date = document.getElementById('date').value;
+  if (!date) { showToast('⚠️ Choisissez une date'); return; }
+
+  const entry = {
+    date,
+    poids: parseFloat(document.getElementById('poids').value) || null,
+    sommeil: parseFloat(document.getElementById('sommeil').value) || null,
+    eau: parseFloat(document.getElementById('eau').value) || null,
+    energie: ratings.energie || null,
+    humeur: ratings.humeur || null,
+    stress: ratings.stress || null,
+    faim: ratings.faim || null,
+    repas: getActiveChips('repas-chips'),
+    grignotage: getActiveChips('grignotage-chips'),
+    r10_minutes: r10,
+    sport_types: getActiveChips('sport-chips'),
+    sport_motivation: motivation,
+    sport_duree: parseInt(document.getElementById('sport-duree').value) || null,
+    repas_matin: document.getElementById('repas-matin').value.trim(),
+    repas_midi: document.getElementById('repas-midi').value.trim(),
+    repas_collation: document.getElementById('repas-collation').value.trim(),
+    repas_soir: document.getElementById('repas-soir').value.trim(),
+    repas_extras: document.getElementById('repas-extras').value.trim(),
+    bonne_action: document.getElementById('bonne-action').value.trim(),
+    declencheur: document.getElementById('declencheur').value.trim(),
+    notes: document.getElementById('notes').value.trim(),
+  };
+
+  let data = getStoredData();
+  const idx = data.findIndex(e => e.date === date);
+  if (idx >= 0) data[idx] = entry; else data.push(entry);
+  data.sort((a,b) => b.date.localeCompare(a.date));
+  localStorage.setItem('suivi_poids', JSON.stringify(data));
+
+  showToast('✅ Journée enregistrée !');
+  updateProgress();
+}
+
+// ===== RESET =====
+function resetForm() {
+  ratings = { energie: 0, humeur: 0, stress: 0, faim: 0 };
+  r10 = ''; motivation = '';
+  ['energie','humeur','stress','faim'].forEach(t => {
+    for (let i=1;i<=5;i++) {
+      document.getElementById(`${t}-${i}`).className = 'star-btn';
+    }
+  });
+  document.querySelectorAll('.chip').forEach(c => c.className = 'chip');
+  ['poids','sommeil','eau','sport-duree'].forEach(id => document.getElementById(id).value = '');
+  ['repas-matin','repas-midi','repas-collation','repas-soir','repas-extras','bonne-action','notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('declencheur').value = '';
+  showToast('🔄 Formulaire réinitialisé');
+}
+
+// ===== STORAGE =====
+function getStoredData() {
+  try { return JSON.parse(localStorage.getItem('suivi_poids')) || []; }
+  catch { return []; }
+}
+
+// ===== RENDER HISTORY =====
+function renderHistory() {
+  const data = getStoredData();
+  const list = document.getElementById('history-list');
+
+  if (!data.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>Aucune entrée pour le moment</div>';
+    document.getElementById('poids-chart').innerHTML = '<div class="empty"><div class="empty-icon">📉</div>Enregistrez des données pour voir votre courbe</div>';
+    return;
+  }
+
+  list.innerHTML = data.map((e, i) => `
+    <div class="history-item" onclick="loadEntry('${e.date}')">
+      <div>
+        <div class="history-date">${formatDate(e.date)}</div>
+        <div class="history-metrics">
+          ${e.poids ? `<div class="history-metric">${e.poids} kg <span>poids</span></div>` : ''}
+          ${e.sommeil ? `<div class="history-metric">${e.sommeil}h <span>sommeil</span></div>` : ''}
+          ${e.stress ? `<div class="history-metric">${e.stress}/5 <span>stress</span></div>` : ''}
+          ${e.energie ? `<div class="history-metric">${e.energie}/5 <span>énergie</span></div>` : ''}
+        </div>
+      </div>
+      <button class="history-delete" onclick="deleteEntry(event,'${e.date}')">✕</button>
+    </div>
+  `).join('');
+
+  renderChart(data);
+}
+
+function formatDate(str) {
+  const d = new Date(str + 'T00:00:00');
+  return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'long' });
+}
+
+// ===== MINI CHART =====
+function renderChart(data) {
+  const withPoids = data.filter(e => e.poids).slice(0, 20).reverse();
+  if (withPoids.length < 2) {
+    document.getElementById('poids-chart').innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:10px">Ajoutez plus d\'entrées pour voir la courbe</div>';
+    return;
+  }
+  const vals = withPoids.map(e => e.poids);
+  const min = Math.min(...vals) - 0.5;
+  const max = Math.max(...vals) + 0.5;
+  const range = max - min;
+  const h = 80;
+  const chart = document.getElementById('poids-chart');
+  chart.innerHTML = '';
+  chart.style.cssText = 'display:flex;align-items:flex-end;gap:4px;padding:20px 0 10px;position:relative;min-height:100px';
+
+  withPoids.forEach((e, i) => {
+    const pct = ((e.poids - min) / range);
+    const barH = 20 + pct * (h - 20);
+    const col = e.poids > vals[0] ? 'var(--red)' : 'var(--green)';
+    const bar = document.createElement('div');
+    bar.style.cssText = `flex:1;height:${barH}px;background:${col};border-radius:4px 4px 0 0;opacity:0.7;position:relative;cursor:default;min-width:8px;transition:opacity .2s`;
+    bar.title = `${formatDate(e.date)}\n${e.poids} kg`;
+    bar.onmouseenter = () => bar.style.opacity = '1';
+    bar.onmouseleave = () => bar.style.opacity = '0.7';
+    const label = document.createElement('div');
+    label.style.cssText = `position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text-muted);white-space:nowrap`;
+    label.textContent = e.poids;
+    bar.appendChild(label);
+    chart.appendChild(bar);
+  });
+}
+
+// ===== LOAD ENTRY =====
+function loadEntry(date) {
+  const data = getStoredData();
+  const entry = data.find(e => e.date === date);
+  if (!entry) return;
+  switchTabDirect('saisie');
+  document.getElementById('date').value = entry.date;
+  updateWeek();
+  if (entry.poids) document.getElementById('poids').value = entry.poids;
+  if (entry.sommeil) document.getElementById('sommeil').value = entry.sommeil;
+  if (entry.eau) document.getElementById('eau').value = entry.eau;
+  if (entry.sport_duree) document.getElementById('sport-duree').value = entry.sport_duree;
+  if (entry.bonne_action) document.getElementById('bonne-action').value = entry.bonne_action;
+  if (entry.declencheur) document.getElementById('declencheur').value = entry.declencheur;
+  if (entry.repas_matin) document.getElementById('repas-matin').value = entry.repas_matin;
+  if (entry.repas_midi) document.getElementById('repas-midi').value = entry.repas_midi;
+  if (entry.repas_collation) document.getElementById('repas-collation').value = entry.repas_collation;
+  if (entry.repas_soir) document.getElementById('repas-soir').value = entry.repas_soir;
+  if (entry.repas_extras) document.getElementById('repas-extras').value = entry.repas_extras;
+  if (entry.notes) document.getElementById('notes').value = entry.notes;
+  ['energie','humeur','stress','faim'].forEach(t => { if (entry[t]) setRating(t, entry[t]); });
+  if (entry.r10_minutes) setR10(entry.r10_minutes);
+  if (entry.sport_motivation) setMotivation(entry.sport_motivation);
+  showToast('📂 Entrée chargée');
+}
+
+function switchTabDirect(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.querySelectorAll('.tab')[0].classList.add('active');
+}
+
+// ===== DELETE =====
+function deleteEntry(ev, date) {
+  ev.stopPropagation();
+  if (!confirm(`Supprimer l'entrée du ${formatDate(date)} ?`)) return;
+  let data = getStoredData().filter(e => e.date !== date);
+  localStorage.setItem('suivi_poids', JSON.stringify(data));
+  renderHistory(); updateProgress();
+  showToast('🗑️ Entrée supprimée');
+}
+
+// ===== EXPORT / IMPORT =====
+function exportData() {
+  const data = getStoredData();
+  const obj = { programme: 'Suivi Perte de Poids', export_date: new Date().toISOString(), entries: data };
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `suivi-poids-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  showToast('📤 Export téléchargé !');
+}
+
+function importData() {
+  document.getElementById('import-file').click();
+}
+
+function handleImport(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      const entries = obj.entries || obj;
+      if (!Array.isArray(entries)) throw new Error();
+      if (!confirm(`Importer ${entries.length} entrées ? Les données existantes seront fusionnées.`)) return;
+      let existing = getStoredData();
+      entries.forEach(entry => {
+        const idx = existing.findIndex(e => e.date === entry.date);
+        if (idx >= 0) existing[idx] = entry; else existing.push(entry);
+      });
+      existing.sort((a,b) => b.date.localeCompare(a.date));
+      localStorage.setItem('suivi_poids', JSON.stringify(existing));
+      renderHistory(); updateProgress();
+      showToast(`✅ ${entries.length} entrées importées`);
+    } catch { showToast('❌ Fichier invalide'); }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+}
+
+// ===== CLEAR =====
+function clearAll() {
+  if (!confirm('Effacer TOUTES les données ? Cette action est irréversible.')) return;
+  localStorage.removeItem('suivi_poids');
+  renderHistory(); updateProgress();
+  showToast('🗑️ Données effacées');
+}
+
+// ===== OBJECTIFS =====
+function saveObjectifs() {
+  const obj = {
+    poids_depart: parseFloat(document.getElementById('poids-depart').value) || null,
+    poids_objectif: parseFloat(document.getElementById('poids-objectif').value) || null,
+  };
+  localStorage.setItem('suivi_objectifs', JSON.stringify(obj));
+  updateProgress();
+  showToast('🎯 Objectifs sauvegardés');
+}
+
+function loadObjectifs() {
+  try {
+    const obj = JSON.parse(localStorage.getItem('suivi_objectifs')) || {};
+    if (obj.poids_depart) document.getElementById('poids-depart').value = obj.poids_depart;
+    if (obj.poids_objectif) document.getElementById('poids-objectif').value = obj.poids_objectif;
+  } catch {}
+}
+
+function updateProgress() {
+  const obj = JSON.parse(localStorage.getItem('suivi_objectifs') || '{}');
+  const data = getStoredData();
+  const last = data.find(e => e.poids);
+  if (!obj.poids_depart || !obj.poids_objectif) return;
+
+  document.getElementById('prog-depart').textContent = obj.poids_depart + ' kg';
+  document.getElementById('prog-objectif').textContent = obj.poids_objectif + ' kg';
+
+  if (last && last.poids) {
+    const perdu = obj.poids_depart - last.poids;
+    const total = obj.poids_depart - obj.poids_objectif;
+    const pct = Math.max(0, Math.min(100, (perdu / total) * 100));
+    document.getElementById('perte-actuelle').textContent = (perdu >= 0 ? '-' : '+') + Math.abs(perdu).toFixed(1) + ' kg';
+    document.getElementById('perte-restante').textContent = '-' + Math.max(0, last.poids - obj.poids_objectif).toFixed(1) + ' kg';
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = Math.round(pct) + '%';
+  }
+}
+
+// ===== OBJ SCORE =====
+function updateObjScore() {
+  const checks = document.querySelectorAll('.obj-check');
+  const done = Array.from(checks).filter(c => c.checked).length;
+  document.getElementById('obj-score').textContent = `${done}/${checks.length}`;
+  const msgs = ['Commencez votre semaine ✨','Bon départ 👍','Vous avancez 💪','Très bien ! 🌟','Excellent travail ! 🏆','Semaine parfaite ! 🎉'];
+  document.getElementById('obj-msg').textContent = msgs[Math.min(done, msgs.length-1)];
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const s = document.getElementById('splash');
+      if (s) { s.style.opacity = '0'; setTimeout(() => s.remove(), 500); }
+    }, 600);
+  });
+</script>
+</body>
+</html>
