@@ -613,25 +613,6 @@
   <!-- ALIMENTATION -->
   <div class="section">
     <div class="section-title">Alimentation</div>
-    <div class="card grid-1" style="margin-bottom:12px">
-      <div class="card-label">Repas respectés</div>
-      <div class="chips" id="repas-chips">
-        <div class="chip" onclick="toggleChip(this,'green')">🌅 Petit-déj</div>
-        <div class="chip" onclick="toggleChip(this,'green')">☀️ Déjeuner</div>
-        <div class="chip" onclick="toggleChip(this,'green')">🌙 Dîner</div>
-      </div>
-    </div>
-    <div class="card grid-1" style="margin-bottom:12px">
-      <div class="card-label">Grignotage hors repas</div>
-      <div class="chips" id="grignotage-chips">
-        <div class="chip" onclick="toggleChip(this,'red')">😰 Stress</div>
-        <div class="chip" onclick="toggleChip(this,'red')">😴 Fatigue</div>
-        <div class="chip" onclick="toggleChip(this,'red')">😶 Ennui</div>
-        <div class="chip" onclick="toggleChip(this,'red')">🤤 Envie sucre</div>
-        <div class="chip" onclick="toggleChip(this,'red')">🧀 Envie gras</div>
-        <div class="chip" onclick="toggleChip(this,'green')">✅ Aucun</div>
-      </div>
-    </div>
     <div class="card grid-1">
       <div class="card-label">Règle des 10 minutes utilisée ?</div>
       <div class="chips">
@@ -675,27 +656,54 @@
     </div>
   </div>
 
-  <!-- ALIMENTATION DÉTAILLÉE -->
+  <!-- CE QUE J'AI MANGÉ -->
   <div class="section">
     <div class="section-title">Ce que j'ai mangé</div>
+
     <div class="card grid-1" style="margin-bottom:12px">
-      <div class="card-label">🌅 Petit-déjeuner</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-label" style="margin:0">🌅 Petit-déjeuner</div>
+        <input type="time" id="heure-matin" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:4px 8px;outline:none;width:100px">
+      </div>
       <textarea id="repas-matin" rows="2" placeholder="Ex: œufs brouillés, tartine complète, café..."></textarea>
     </div>
+
     <div class="card grid-1" style="margin-bottom:12px">
-      <div class="card-label">☀️ Déjeuner</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-label" style="margin:0">☀️ Déjeuner</div>
+        <input type="time" id="heure-midi" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:4px 8px;outline:none;width:100px">
+      </div>
       <textarea id="repas-midi" rows="2" placeholder="Ex: poulet grillé, haricots verts, quinoa, huile d'olive..."></textarea>
     </div>
+
     <div class="card grid-1" style="margin-bottom:12px">
-      <div class="card-label">🌆 Collation (si applicable)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-label" style="margin:0">🌆 Collation (si applicable)</div>
+        <input type="time" id="heure-collation" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:4px 8px;outline:none;width:100px">
+      </div>
       <textarea id="repas-collation" rows="2" placeholder="Ex: fruit + amandes, yaourt nature..."></textarea>
     </div>
+
     <div class="card grid-1" style="margin-bottom:12px">
-      <div class="card-label">🌙 Dîner</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="card-label" style="margin:0">🌙 Dîner</div>
+        <input type="time" id="heure-soir" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:4px 8px;outline:none;width:100px">
+      </div>
       <textarea id="repas-soir" rows="2" placeholder="Ex: soupe de légumes, œufs cocotte, tartine..."></textarea>
     </div>
+
     <div class="card grid-1">
-      <div class="card-label">🍫 Grignotage / extras (si applicable)</div>
+      <div class="card-label" style="margin-bottom:10px">🍫 Grignotage hors repas</div>
+      <div class="card-label" style="margin-bottom:8px;font-size:10px">Déclencheur</div>
+      <div class="chips" style="margin-bottom:12px" id="grignotage-chips">
+        <div class="chip" onclick="toggleChip(this,'red')">😰 Stress</div>
+        <div class="chip" onclick="toggleChip(this,'red')">😴 Fatigue</div>
+        <div class="chip" onclick="toggleChip(this,'red')">😶 Ennui</div>
+        <div class="chip" onclick="toggleChip(this,'red')">🤤 Envie sucre</div>
+        <div class="chip" onclick="toggleChip(this,'red')">🧀 Envie gras</div>
+        <div class="chip" onclick="toggleChip(this,'green')">✅ Aucun</div>
+      </div>
+      <div class="card-label" style="margin-bottom:8px;font-size:10px">Ce que j'ai mangé (si applicable)</div>
       <textarea id="repas-extras" rows="2" placeholder="Ex: 2 carrés chocolat noir, chips au bureau..."></textarea>
     </div>
   </div>
@@ -945,6 +953,10 @@ function saveEntry() {
     sport_types: getActiveChips('sport-chips'),
     sport_motivation: motivation,
     sport_duree: parseInt(document.getElementById('sport-duree').value) || null,
+    heure_matin: document.getElementById('heure-matin').value,
+    heure_midi: document.getElementById('heure-midi').value,
+    heure_collation: document.getElementById('heure-collation').value,
+    heure_soir: document.getElementById('heure-soir').value,
     repas_matin: document.getElementById('repas-matin').value.trim(),
     repas_midi: document.getElementById('repas-midi').value.trim(),
     repas_collation: document.getElementById('repas-collation').value.trim(),
@@ -976,6 +988,7 @@ function resetForm() {
   });
   document.querySelectorAll('.chip').forEach(c => c.className = 'chip');
   ['poids','sommeil','eau','sport-duree'].forEach(id => document.getElementById(id).value = '');
+  ['heure-matin','heure-midi','heure-collation','heure-soir'].forEach(id => document.getElementById(id).value = '');
   ['repas-matin','repas-midi','repas-collation','repas-soir','repas-extras','bonne-action','notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('declencheur').value = '';
   showToast('🔄 Formulaire réinitialisé');
@@ -1068,6 +1081,10 @@ function loadEntry(date) {
   if (entry.sport_duree) document.getElementById('sport-duree').value = entry.sport_duree;
   if (entry.bonne_action) document.getElementById('bonne-action').value = entry.bonne_action;
   if (entry.declencheur) document.getElementById('declencheur').value = entry.declencheur;
+  if (entry.heure_matin) document.getElementById('heure-matin').value = entry.heure_matin;
+  if (entry.heure_midi) document.getElementById('heure-midi').value = entry.heure_midi;
+  if (entry.heure_collation) document.getElementById('heure-collation').value = entry.heure_collation;
+  if (entry.heure_soir) document.getElementById('heure-soir').value = entry.heure_soir;
   if (entry.repas_matin) document.getElementById('repas-matin').value = entry.repas_matin;
   if (entry.repas_midi) document.getElementById('repas-midi').value = entry.repas_midi;
   if (entry.repas_collation) document.getElementById('repas-collation').value = entry.repas_collation;
@@ -1075,6 +1092,14 @@ function loadEntry(date) {
   if (entry.repas_extras) document.getElementById('repas-extras').value = entry.repas_extras;
   if (entry.notes) document.getElementById('notes').value = entry.notes;
   ['energie','humeur','stress','faim'].forEach(t => { if (entry[t]) setRating(t, entry[t]); });
+  if (entry.grignotage && entry.grignotage.length) {
+    document.querySelectorAll('#grignotage-chips .chip').forEach(c => {
+      if (entry.grignotage.includes(c.textContent.trim())) {
+        c.classList.add('active');
+        c.classList.add(c.textContent.includes('Aucun') ? 'active-green' : 'active-red');
+      }
+    });
+  }
   if (entry.r10_minutes) setR10(entry.r10_minutes);
   if (entry.sport_motivation) setMotivation(entry.sport_motivation);
   showToast('📂 Entrée chargée');
