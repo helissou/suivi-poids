@@ -474,6 +474,10 @@
 <div class="header">
   <h1>Mon <em>Suivi</em></h1>
   <p>Programme accompagnement · Démarré le 17 mars 2026</p>
+  <div id="sync-status" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:4px 12px">
+    <span id="sync-dot" style="width:6px;height:6px;border-radius:50%;background:var(--text-muted);display:inline-block"></span>
+    <span id="sync-label">Non connecté</span>
+  </div>
 </div>
 
 <!-- TABS -->
@@ -508,11 +512,22 @@
         <input type="number" id="poids" step="0.1" min="40" max="150" placeholder="62.0">
         <div class="unit">kg</div>
       </div>
-      <div class="card big-number">
-        <div class="card-label">Sommeil</div>
+      <div class="card" style="position:relative">
         <div class="card-icon">🌙</div>
-        <input type="number" id="sommeil" step="0.25" min="0" max="12" placeholder="6.5">
-        <div class="unit">heures</div>
+        <div class="card-label">Sommeil</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Coucher</div>
+            <input type="time" id="heure-coucher" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:8px;outline:none" onchange="calcSommeil()">
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em">Lever</div>
+            <input type="time" id="heure-lever" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:8px;outline:none" onchange="calcSommeil()">
+          </div>
+        </div>
+        <div style="text-align:center;font-family:'DM Serif Display',serif;font-size:24px;color:var(--accent)" id="sommeil-affiche">—</div>
+        <div style="text-align:center;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">heures de sommeil</div>
+        <input type="hidden" id="sommeil">
       </div>
       <div class="card big-number">
         <div class="card-label">Eau</div>
@@ -617,6 +632,7 @@
       <div class="card-label">Règle des 10 minutes utilisée ?</div>
       <div class="chips">
         <div class="chip" id="r10-oui" onclick="setR10('oui')">✅ Oui</div>
+        <div class="chip" id="r10-essai" onclick="setR10('essai')">💪 Essayé mais pas réussi</div>
         <div class="chip" id="r10-non" onclick="setR10('non')">❌ Non applicable</div>
         <div class="chip" id="r10-oubli" onclick="setR10('oubli')">😅 Oublié</div>
       </div>
@@ -753,7 +769,8 @@
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-primary" onclick="exportData()">📤 Exporter JSON</button>
+    <button class="btn btn-primary" onclick="syncFromSheets()">🔄 Sync Google Sheets</button>
+    <button class="btn btn-secondary" onclick="exportData()">📤 Exporter JSON</button>
     <button class="btn btn-secondary" onclick="importData()">📥 Importer JSON</button>
   </div>
   <div style="margin-top:10px">
@@ -852,6 +869,9 @@
 <div class="toast" id="toast">✅ Enregistré !</div>
 
 <script>
+// ===== CONFIG =====
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0bM3zhRlA_95YvWZz5HexC4iCUOycMRM4CcI_rqsOwF8nIO00qwwB85TjlYRbj655/exec';
+
 // ===== STATE =====
 let ratings = { energie: 0, humeur: 0, stress: 0, faim: 0 };
 let r10 = '';
@@ -867,6 +887,7 @@ window.onload = () => {
   renderHistory();
   updateProgress();
   document.querySelectorAll('.obj-check').forEach(cb => cb.addEventListener('change', updateObjScore));
+  checkConnection();
   updateObjScore();
 };
 
@@ -885,6 +906,27 @@ function switchTab(tab) {
   event.target.classList.add('active');
   if (tab === 'historique') { renderHistory(); updateProgress(); }
   if (tab === 'objectifs') { loadObjectifs(); updateProgress(); }
+}
+
+// ===== CALC SOMMEIL =====
+function calcSommeil() {
+  const coucher = document.getElementById('heure-coucher').value;
+  const lever = document.getElementById('heure-lever').value;
+  if (!coucher || !lever) return;
+  
+  const [hC, mC] = coucher.split(':').map(Number);
+  const [hL, mL] = lever.split(':').map(Number);
+  
+  let totalMin = (hL * 60 + mL) - (hC * 60 + mC);
+  if (totalMin < 0) totalMin += 24 * 60; // nuit qui passe minuit
+  
+  const heures = Math.floor(totalMin / 60);
+  const minutes = totalMin % 60;
+  const decimal = Math.round((totalMin / 60) * 4) / 4; // arrondi 0.25
+  
+  document.getElementById('sommeil-affiche').textContent = 
+    heures + 'h' + (minutes > 0 ? String(minutes).padStart(2,'0') : '');
+  document.getElementById('sommeil').value = decimal;
 }
 
 // ===== RATINGS =====
@@ -910,12 +952,13 @@ function toggleChip(el, color) {
 
 function setR10(val) {
   r10 = val;
-  ['oui','non','oubli'].forEach(v => {
+  ['oui','essai','non','oubli'].forEach(v => {
     const el = document.getElementById(`r10-${v}`);
     el.classList.remove('active','active-green','active-red');
   });
   const el = document.getElementById(`r10-${val}`);
-  el.classList.add('active', val === 'oui' ? 'active-green' : 'active-red');
+  const color = val === 'oui' ? 'active-green' : val === 'essai' ? 'active' : 'active-red';
+  el.classList.add('active', color);
 }
 
 function setMotivation(val) {
@@ -934,13 +977,15 @@ function getActiveChips(containerId) {
 }
 
 // ===== SAVE =====
-function saveEntry() {
+async function saveEntry() {
   const date = document.getElementById('date').value;
   if (!date) { showToast('⚠️ Choisissez une date'); return; }
 
   const entry = {
     date,
     poids: parseFloat(document.getElementById('poids').value) || null,
+    heure_coucher: document.getElementById('heure-coucher').value,
+    heure_lever: document.getElementById('heure-lever').value,
     sommeil: parseFloat(document.getElementById('sommeil').value) || null,
     eau: parseFloat(document.getElementById('eau').value) || null,
     energie: ratings.energie || null,
@@ -967,13 +1012,29 @@ function saveEntry() {
     notes: document.getElementById('notes').value.trim(),
   };
 
+  // Save to localStorage
   let data = getStoredData();
   const idx = data.findIndex(e => e.date === date);
   if (idx >= 0) data[idx] = entry; else data.push(entry);
   data.sort((a,b) => b.date.localeCompare(a.date));
   localStorage.setItem('suivi_poids', JSON.stringify(data));
 
-  showToast('✅ Journée enregistrée !');
+  // Save to Google Sheets
+  showToast('💾 Enregistrement en cours...');
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'save', entry }),
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast('✅ Sauvegardé dans Google Sheets !');
+    } else {
+      showToast('⚠️ Local OK, Sheets non synchronisé');
+    }
+  } catch(err) {
+    showToast('⚠️ Local OK, pas de connexion internet');
+  }
   updateProgress();
 }
 
@@ -988,7 +1049,9 @@ function resetForm() {
   });
   document.querySelectorAll('.chip').forEach(c => c.className = 'chip');
   ['poids','sommeil','eau','sport-duree'].forEach(id => document.getElementById(id).value = '');
-  ['heure-matin','heure-midi','heure-collation','heure-soir'].forEach(id => document.getElementById(id).value = '');
+  ['heure-coucher','heure-lever','heure-matin','heure-midi','heure-collation','heure-soir'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sommeil-affiche').textContent = '—';
+  document.getElementById('sommeil').value = '';
   ['repas-matin','repas-midi','repas-collation','repas-soir','repas-extras','bonne-action','notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('declencheur').value = '';
   showToast('🔄 Formulaire réinitialisé');
@@ -1076,6 +1139,9 @@ function loadEntry(date) {
   document.getElementById('date').value = entry.date;
   updateWeek();
   if (entry.poids) document.getElementById('poids').value = entry.poids;
+  if (entry.heure_coucher) { document.getElementById('heure-coucher').value = entry.heure_coucher; }
+  if (entry.heure_lever) { document.getElementById('heure-lever').value = entry.heure_lever; }
+  if (entry.heure_coucher && entry.heure_lever) calcSommeil();
   if (entry.sommeil) document.getElementById('sommeil').value = entry.sommeil;
   if (entry.eau) document.getElementById('eau').value = entry.eau;
   if (entry.sport_duree) document.getElementById('sport-duree').value = entry.sport_duree;
@@ -1120,6 +1186,32 @@ function deleteEntry(ev, date) {
   localStorage.setItem('suivi_poids', JSON.stringify(data));
   renderHistory(); updateProgress();
   showToast('🗑️ Entrée supprimée');
+}
+
+// ===== SYNC FROM SHEETS =====
+async function syncFromSheets() {
+  showToast('🔄 Synchronisation...');
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=getAll');
+    const result = await res.json();
+    if (result.success && result.entries.length) {
+      // Merge: Sheets is source of truth
+      let local = getStoredData();
+      result.entries.forEach(entry => {
+        const idx = local.findIndex(e => e.date === entry.date);
+        if (idx >= 0) local[idx] = entry; else local.push(entry);
+      });
+      local.sort((a,b) => b.date.localeCompare(a.date));
+      localStorage.setItem('suivi_poids', JSON.stringify(local));
+      renderHistory();
+      updateProgress();
+      showToast(`✅ ${result.entries.length} entrées synchronisées !`);
+    } else {
+      showToast('📭 Aucune donnée dans Sheets');
+    }
+  } catch(err) {
+    showToast('❌ Erreur de connexion');
+  }
 }
 
 // ===== EXPORT / IMPORT =====
@@ -1207,6 +1299,21 @@ function updateProgress() {
     document.getElementById('perte-restante').textContent = '-' + Math.max(0, last.poids - obj.poids_objectif).toFixed(1) + ' kg';
     document.getElementById('progress-fill').style.width = pct + '%';
     document.getElementById('prog-pct').textContent = Math.round(pct) + '%';
+  }
+}
+
+// ===== CONNECTION CHECK =====
+async function checkConnection() {
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=ping');
+    const result = await res.json();
+    if (result) {
+      document.getElementById('sync-dot').style.background = 'var(--green)';
+      document.getElementById('sync-label').textContent = '✅ Google Sheets connecté';
+    }
+  } catch(e) {
+    document.getElementById('sync-dot').style.background = 'var(--red)';
+    document.getElementById('sync-label').textContent = 'Hors ligne';
   }
 }
 
